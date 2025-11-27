@@ -1,5 +1,5 @@
 return {
-    keysAsItems = true, -- TODO: implement keys as items
+    keysAsItems = false, -- TODO: implement keys as items
     keysItemName = "vehiclekeys",
 
     ---For a given vehicle, the config used is based on precendence of:
