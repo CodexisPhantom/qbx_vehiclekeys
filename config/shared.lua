@@ -1,4 +1,7 @@
 return {
+    keysAsItems = true, -- TODO: implement keys as items
+    keysItemName = "vehiclekeys",
+
     ---For a given vehicle, the config used is based on precendence of:
     ---1. model
     ---2. category from qbx_core shared/vehicles.lua

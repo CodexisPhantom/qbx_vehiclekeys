@@ -1,4 +1,5 @@
 local config = require 'config.client'
+local shared = require 'config.shared'
 
 ---client uses key fob to toggle the door locks
 ---@param vehicle number The entity number of the vehicle.
@@ -7,7 +8,6 @@ local function toggleLock(vehicle)
     local vehicleConfig = GetVehicleConfig(vehicle)
     if vehicleConfig.noLock or vehicleConfig.shared then return end
     if GetIsVehicleAccessible(vehicle) then
-
         lib.playAnim(cache.ped, 'anim@mp_player_intmenu@key_fob@', 'fob_click', 3.0, 3.0, -1, 49)
 
         --- if the statebag is out of sync, rely on it as the source of truth and sync the client to the statebag's value
@@ -120,7 +120,7 @@ local function toggleEngine(vehicle)
         or config.anims.toggleEngine.class[vehicleClass]
         or config.anims.toggleEngine.default
     if next(anim) then
-        lib.playAnim(cache.ped, anim.dict, anim.clip, 8.0, 8.0,-1, 48, 0)
+        lib.playAnim(cache.ped, anim.dict, anim.clip, 8.0, 8.0, -1, 48, 0)
         Wait(0)
         CreateThread(function()
             while IsEntityPlayingAnim(cache.ped, anim.dict, anim.clip, 3) do
@@ -170,15 +170,15 @@ RegisterNetEvent('QBCore:Client:VehicleInfo', function(data)
     if driver ~= 0 and IsEntityDead(driver) and not (vehicleConfig.carjackingImmune or IsPedAPlayer(driver)) then
         TriggerServerEvent('qb-vehiclekeys:server:setVehLockState', data.netId, 1)
         if lib.progressCircle({
-            duration = 2500,
-            label = locale('progress.takekeys'),
-            position = 'bottom',
-            useWhileDead = false,
-            canCancel = true,
-            disable = {
-                car = true,
-            },
-        }) then
+                duration = 2500,
+                label = locale('progress.takekeys'),
+                position = 'bottom',
+                useWhileDead = false,
+                canCancel = true,
+                disable = {
+                    car = true,
+                },
+            }) then
             TriggerServerEvent('qbx_vehiclekeys:server:tookKeys', VehToNet(data.vehicle))
         end
     end
@@ -208,14 +208,15 @@ end)
 
 for _, info in pairs(config.sharedKeys) do
     if info.enableAutolock then
-        lib.onCache('vehicle', function (vehicle)
+        lib.onCache('vehicle', function(vehicle)
             local leftVehicle = cache.vehicle
             if not vehicle and leftVehicle then
                 local isShared = AreKeysJobShared(leftVehicle)
                 local isAutolockEnabled = config.sharedKeys[QBX.PlayerData.job.name]?.enableAutolock
 
                 if isShared and isAutolockEnabled then
-                    TriggerServerEvent('qb-vehiclekeys:server:setVehLockState', NetworkGetNetworkIdFromEntity(leftVehicle), 2)
+                    TriggerServerEvent('qb-vehiclekeys:server:setVehLockState',
+                        NetworkGetNetworkIdFromEntity(leftVehicle), 2)
                 end
             end
         end)
@@ -243,7 +244,7 @@ local function getIsVehicleInitiallyLocked(vehicle, isDriven)
     local vehicleConfig = GetVehicleConfig(vehicle)
     local vehicleLockedChance = isDriven
         and vehicleConfig.spawnLockedIfDriven
-         or vehicleConfig.spawnLockedIfParked
+        or vehicleConfig.spawnLockedIfParked
 
     if type(vehicleLockedChance) == 'number' then
         return math.random() < vehicleLockedChance
@@ -289,3 +290,10 @@ AddStateBagChangeHandler('isLoggedIn', ('player:%s'):format(cache.serverId), fun
     if not value then return end
     playerEnterVehLoop()
 end)
+
+if shared.keysAsItems then
+    exports.ox_inventory:displayMetadata({
+        plate = locale('info.plate'),
+        name = locale('info.name')
+    })
+end
