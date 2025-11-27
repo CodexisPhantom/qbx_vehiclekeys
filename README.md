@@ -77,7 +77,7 @@ Add the following to your `ox_inventory/data/items.lua` to ensure both lockpick 
 ```
 ## Vehicle keys as item (optional)
 
-If you want vehicle keys to be represented as items in player inventories, you can enable that in the config in `config/shared.lua` by setting `keysAsItems = true`.
+If you want vehicle keys to be represented as items in player inventories, you can enable that in the config in `config/shared.lua` by setting `keysAsItems.enabled = true`.
 
 ```lua
     ['vehiclekeys'] = {

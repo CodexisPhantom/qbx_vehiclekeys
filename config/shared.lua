@@ -1,6 +1,9 @@
 return {
-    keysAsItems = false, -- TODO: implement keys as items
-    keysItemName = "vehiclekeys",
+    keysAsItems = {
+        enabled = false,
+        item = "vehiclekeys",
+        grantKeysIfOwner = true,
+    },
 
     ---For a given vehicle, the config used is based on precendence of:
     ---1. model

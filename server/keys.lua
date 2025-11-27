@@ -95,7 +95,7 @@ end
 ---@param vehicle number
 ---@param skipNotification? boolean
 function RemoveKeys(source, vehicle, skipNotification, temporary)
-    if shared.keysAsItems and not temporary then
+    if shared.keysAsItems.enabled and not temporary then
         return RemoveKeysItem(source, vehicle, skipNotification)
     end
 
@@ -162,7 +162,7 @@ end
 ---@param skipNotification? boolean
 ---@param temporary? boolean
 function GiveKeys(source, vehicle, skipNotification, temporary)
-    if shared.keysAsItems and not temporary then
+    if shared.keysAsItems.enabled and not temporary then
         return GiveKeysItem(source, vehicle, skipNotification)
     end
 
@@ -200,7 +200,7 @@ end
 ---@param vehicle number
 ---@return boolean
 function HasKeys(src, vehicle)
-    if shared.keysAsItems and HasKeysItem(src, vehicle) then
+    if shared.keysAsItems.enabled and HasKeysItem(src, vehicle) then
         return true
     end
 
@@ -212,9 +212,11 @@ function HasKeys(src, vehicle)
         end
     end
 
-    local owner = Entity(vehicle).state.owner
-    if owner and getCitizenId(src) == owner then
-        return GiveKeys(src, vehicle)
+    if shared.keysAsItems.grantKeysIfOwner then
+        local owner = Entity(vehicle).state.owner
+        if owner and getCitizenId(src) == owner then
+            return GiveKeys(src, vehicle)
+        end
     end
 
     return false

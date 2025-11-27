@@ -32,7 +32,7 @@ function HasKeys(vehicle)
     vehicle = vehicle or cache.vehicle
     if not vehicle then return false end
 
-    if shared.keysAsItems and HasKeysItem(vehicle) then
+    if shared.keysAsItems.enabled and HasKeysItem(vehicle) then
         return true
     end
 
@@ -44,10 +44,12 @@ function HasKeys(vehicle)
         end
     end
 
-    local owner = Entity(vehicle).state.owner
-    if owner and QBX.PlayerData.citizenid == owner then
-        lib.callback.await('qbx_vehiclekeys:server:giveKeys', false, VehToNet(vehicle))
-        return true
+    if shared.keysAsItems.grantKeysIfOwner then
+        local owner = Entity(vehicle).state.owner
+        if owner and QBX.PlayerData.citizenid == owner then
+            lib.callback.await('qbx_vehiclekeys:server:giveKeys', false, VehToNet(vehicle))
+            return true
+        end
     end
 
     return false

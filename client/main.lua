@@ -291,7 +291,7 @@ AddStateBagChangeHandler('isLoggedIn', ('player:%s'):format(cache.serverId), fun
     playerEnterVehLoop()
 end)
 
-if shared.keysAsItems then
+if shared.keysAsItems.enabled then
     exports.ox_inventory:displayMetadata({
         plate = locale('info.plate'),
         name = locale('info.name')
