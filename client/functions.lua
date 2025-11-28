@@ -5,7 +5,7 @@ local function HasKeysItem(vehicle)
     local plate = qbx.getVehiclePlate(vehicle)
     if not plate then return false end
 
-    local count = exports.ox_inventory:Search('count', shared.keysItemName, {
+    local count = exports.ox_inventory:Search('count', shared.keysAsItems.item, {
         plate = plate,
     })
     return count and count > 0
@@ -44,7 +44,7 @@ function HasKeys(vehicle)
         end
     end
 
-    if shared.keysAsItems.grantKeysIfOwner then
+    if shared.grantKeysIfOwner then
         local owner = Entity(vehicle).state.owner
         if owner and QBX.PlayerData.citizenid == owner then
             lib.callback.await('qbx_vehiclekeys:server:giveKeys', false, VehToNet(vehicle))

@@ -64,14 +64,14 @@ local function RemoveKeysItem(source, vehicle, skipNotification)
     local plate = qbx.getVehiclePlate(vehicle)
     if not plate then return false end
 
-    local slots = exports.ox_inventory:Search(source, 'slots', shared.keysItemName, {
+    local slots = exports.ox_inventory:Search(source, 'slots', shared.keysAsItems.item, {
         plate = plate,
     })
     if not slots or not next(slots) then return false end
 
     local success = true
     for _, item in pairs(slots) do
-        local removed, response = exports.ox_inventory:RemoveItem(source, shared.keysItemName, 1, nil, item.slot)
+        local removed, response = exports.ox_inventory:RemoveItem(source, shared.keysAsItems.item, 1, nil, item.slot)
         if not removed then
             success = false
             lib.print.warn(('Failed to remove vehicle key item from slot %s for player %s: %s'):format(item.slot, source,
@@ -136,7 +136,7 @@ local function GiveKeysItem(source, vehicle, skipNotification)
     local plate = qbx.getVehiclePlate(vehicle)
     if not plate then return false end
 
-    local slots = exports.ox_inventory:Search(source, 'slots', shared.keysItemName, {
+    local slots = exports.ox_inventory:Search(source, 'slots', shared.keysAsItems.item, {
         plate = plate,
     })
     if slots and next(slots) then return true end
@@ -149,7 +149,7 @@ local function GiveKeysItem(source, vehicle, skipNotification)
         label = ('%s - %s'):format(locale('key'), name),
     }
 
-    local success = exports.ox_inventory:AddItem(source, shared.keysItemName, 1, metadata)
+    local success = exports.ox_inventory:AddItem(source, shared.keysAsItems.item, 1, metadata)
     if success and not skipNotification then
         exports.qbx_core:Notify(source, locale('notify.keys_taken'))
     end
@@ -190,7 +190,7 @@ exports('GiveKeys', GiveKeys)
 local function HasKeysItem(source, vehicle)
     local plate = qbx.getVehiclePlate(vehicle)
     if not plate then return false end
-    local count = exports.ox_inventory:Search(source, 'count', shared.keysItemName, {
+    local count = exports.ox_inventory:Search(source, 'count', shared.keysAsItems.item, {
         plate = plate,
     })
     return count and count > 0
@@ -212,7 +212,7 @@ function HasKeys(src, vehicle)
         end
     end
 
-    if shared.keysAsItems.grantKeysIfOwner then
+    if shared.grantKeysIfOwner then
         local owner = Entity(vehicle).state.owner
         if owner and getCitizenId(src) == owner then
             return GiveKeys(src, vehicle)

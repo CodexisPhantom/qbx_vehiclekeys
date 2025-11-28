@@ -1,9 +1,10 @@
 return {
     keysAsItems = {
-        enabled = false,
-        item = "vehiclekeys",
-        grantKeysIfOwner = true,
+        enabled = false, -- Whether vehicle keys are represented as items (need ox_inventory)
+        item = "vehiclekeys", -- The item name used for vehicle keys
     },
+
+    grantKeysIfOwner = true, -- Whether to automatically give keys to the owner of the vehicle when checking for keys
 
     ---For a given vehicle, the config used is based on precendence of:
     ---1. model
