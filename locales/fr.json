@@ -33,11 +33,24 @@
     "vehicle_lockedpick": "Vous avez réussi à ouvrir le véhicule!",
     "vehicle_unlocked": "Véhicule déverrouillé!",
     "vehicle_is_unlocked": "Le véhicule est déjà déverrouillé!",
-    "not_optin": "Vous n'êtes pas inscrit pour le service administrateur. (/optin pour basculer)"
+    "not_optin": "Vous n'êtes pas inscrit pour le service administrateur. (/optin pour basculer)",
+    "no_own_vehicles": "Vous ne possédez aucun véhicule !",
+    "not_enough_money": "Vous n'avez pas assez d'argent pour acheter les clés !",
+    "vehicle_not_found": "Véhicule introuvable !",
+    "bought_keys": "Vous avez acheté les clés du véhicule !",
+    "not_your_vehicle": "Ce n'est pas votre véhicule !"
   },
   "progress": {
     "attempting_carjack": "Tentative de vol de carjack..",
     "searching_keys": "Cherche les clés du véhicule..",
     "takekeys": "Prend les clés du corps.."
+  },
+  "menu": {
+    "key_vendor_title": "Vendeur de Clés",
+    "buy_keys_description": "Acheter les clés du véhicule pour %s$",
+    "select_payment_method": "Sélectionner le mode de paiement",
+    "payment_method": "Mode de paiement",
+    "payment_method_cash": "Espèces",
+    "payment_method_bank": "Banque"
   }
 }

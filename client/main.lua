@@ -155,6 +155,21 @@ EngineBind = lib.addKeybind({
     end
 })
 
+if config.useTarget then
+    exports.ox_target:addGlobalVehicle({
+        name = 'toggle_vehicle_locks',
+        icon = 'fas fa-lock',
+        label = locale('info.toggle_locks'),
+        onSelect = function(data)
+            toggleLock(data.entity)
+        end,
+        canInteract = function(entity)
+            local vehicleConfig = GetVehicleConfig(entity)
+            return not vehicleConfig.noLock
+        end,
+    })
+end
+
 -----------------------
 ---- Client Events ----
 -----------------------
@@ -279,9 +294,113 @@ local function playerEnterVehLoop()
     end)
 end
 
+local blips = {}
+local zones = {}
+
+local function openKeyVendorMenu()
+    local options = {}
+    local vehicles = lib.callback.await('qbx_vehiclekeys:server:getPlayerVehicles', 2500)
+
+    if #vehicles == 0 then
+        exports.qbx_core:Notify(locale('notify.no_own_vehicles'), 'error')
+        return
+    end
+
+    for _, vehicle in ipairs(vehicles) do
+        options[#options + 1] = {
+            title = ('%s (%s)'):format(vehicle.name, vehicle.plate),
+            description = locale('menu.buy_keys_description', shared.keysAsItems.price),
+            icon = 'car',
+            onSelect = function()
+                local input = lib.inputDialog(locale('menu.select_payment_method'), {
+                    {
+                        type = 'select',
+                        label = locale('menu.payment_method'),
+                        options = {
+                            { value = 'cash', label = locale('menu.payment_method_cash') },
+                            { value = 'bank', label = locale('menu.payment_method_bank') },
+                        },
+                    }
+                })
+
+                if not input then return end
+                TriggerServerEvent('qbx_vehiclekeys:server:buyKeysForVehicle', input[1], vehicle.plate)
+            end
+        }
+    end
+
+    lib.registerContext({
+        id = 'key_vendor_menu',
+        title = locale('menu.key_vendor_title'),
+        options = options
+    })
+    lib.showContext('key_vendor_menu')
+end
+
+local function createKeyVendors()
+    if not shared.keysAsItems.enabled then return end
+    for _, coords in ipairs(config.keyVendors.locations) do
+        zones[#zones + 1] = lib.zones.sphere({
+            coords = vec3(coords.x, coords.y, coords.z),
+            radius = 50.0,
+            inside = not config.useTarget and function(self)
+                if self.distance < 2.0 and IsControlJustReleased(0, 38) then
+                    openKeyVendorMenu()
+                end
+                Wait(0)
+            end or nil,
+            onEnter = function(self)
+                local model = lib.requestModel(config.keyVendors.model, 5000)
+                self.ped = CreatePed(4, model, self.coords.x, self.coords.y, self.coords.z - 1.0, coords.w, false, false)
+                FreezeEntityPosition(self.ped, true)
+                SetEntityInvincible(self.ped, true)
+                SetBlockingOfNonTemporaryEvents(self.ped, true)
+                SetModelAsNoLongerNeeded(model)
+
+                if config.useTarget then
+                    exports.ox_target:addLocalEntity(self.ped, {
+                        {
+                            name = 'key_vendor_interact',
+                            icon = 'fas fa-key',
+                            label = locale('menu.key_vendor_title'),
+                            onSelect = openKeyVendorMenu
+                        }
+                    })
+                else
+                    lib.showTextUI('[E] - ' .. locale('menu.key_vendor_title'))
+                end
+            end,
+            onExit = function(self)
+                if self.ped and DoesEntityExist(self.ped) then
+                    DeleteEntity(self.ped)
+                end
+                if config.useTarget then
+                    exports.ox_target:removeLocalEntity(self.ped)
+                else
+                    lib.hideTextUI()
+                end
+            end,
+        })
+
+        if config.keyVendors.showBlip then
+            local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
+            SetBlipSprite(blip, config.keyVendors.blip.sprite)
+            SetBlipDisplay(blip, 4)
+            SetBlipScale(blip, config.keyVendors.blip.scale)
+            SetBlipColour(blip, config.keyVendors.blip.colour)
+            SetBlipAsShortRange(blip, true)
+            BeginTextCommandSetBlipName('STRING')
+            AddTextComponentSubstringPlayerName(locale('menu.key_vendor_title'))
+            EndTextCommandSetBlipName(blip)
+            blips[#blips + 1] = blip
+        end
+    end
+end
+
 CreateThread(function()
     if LocalPlayer.state.isLoggedIn then
         playerEnterVehLoop()
+        createKeyVendors()
     end
 end)
 
@@ -289,6 +408,18 @@ AddStateBagChangeHandler('isLoggedIn', ('player:%s'):format(cache.serverId), fun
     isLoggedIn = value
     if not value then return end
     playerEnterVehLoop()
+    createKeyVendors()
+end)
+
+AddEventHandler('onResourceStop', function(resource)
+    if resource ~= GetCurrentResourceName() then return end
+    if not shared.keysAsItems.enabled then return end
+    for _, zone in pairs(zones) do
+        zone:remove()
+    end
+    for _, blip in pairs(blips) do
+        RemoveBlip(blip)
+    end
 end)
 
 if shared.keysAsItems.enabled then
