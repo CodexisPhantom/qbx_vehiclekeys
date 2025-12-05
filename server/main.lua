@@ -42,7 +42,6 @@ lib.callback.register('qbx_vehiclekeys:server:getPlayerVehicles', function(src)
 
     for _, vehicle in pairs(playerVehicles) do
         local data = exports.qbx_core:GetVehiclesByName(vehicle.modelName)
-        lib.print.info(data)
         if data then
             vehicles[#vehicles + 1] = {
                 name = data.name,
